@@ -1,1 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX WEB3 Verification</title>
 
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:Arial,sans-serif;
+background:#05070b;
+color:#fff;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+
+.container{
+width:100%;
+max-width:520px;
+background:#0c1018;
+border:1px solid #252d3a;
+border-radius:22px;
+padding:32px 22px;
+box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+
+.logo{
+text-align:center;
+font-size:27px;
+font-weight:800;
+letter-spacing:2px;
+margin-bottom:8px;
+}
+
+.logo span{color:#d6a84f}
+
+.subtitle{
+text-align:center;
+color:#8e98a8;
+font-size:14px;
+margin-bottom:30px;
+}
+
+.badge{
+display:block;
+width:max-content;
+margin:0 auto 25px;
+padding:7px 14px;
+border-radius:30px;
+background:#151b25;
+border:1px solid #303a4a;
+font-size:12px;
+color:#d6a84f;
+}
+
+label{
+display:block;
+font-size:13px;
+color:#aeb7c5;
+margin-bottom:8px;
+}
+
+input{
+width:100%;
+padding:15px;
+border-radius:12px;
+border:1px solid #303846;
+background:#070a10;
+color:#fff;
+font-size:15px;
+outline:none;
+}
+
+input:focus{border-color:#d6a84f}
+
+button{
+width:100%;
+margin-top:14px;
+padding:15px;
+border:0;
+border-radius:12px;
+background:#d6a84f;
+color:#080a0e;
+font-size:15px;
+font-weight:700;
+cursor:pointer;
+}
+
+.result{
+display:none;
+margin-top:25px;
+padding:20px;
+border-radius:15px;
+background:#080c12;
+border:1px solid #26303d;
+}
+
+.verified{
+color:#58d68d;
+font-size:18px;
+font-weight:700;
+margin-bottom:12px;
+}
+
+.notverified{
+color:#ff6b6b;
+font-size:18px;
+font-weight:700;
+margin-bottom:12px;
+}
+
+.details{
+color:#aeb7c5;
+font-size:14px;
+line-height:1.8;
+}
+
+.footer{
+text-align:center;
+margin-top:25px;
+font-size:11px;
+color:#657080;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">
+APEX <span>WEB3</span>
+</div>
+
+<div class="subtitle">
+Official APEX WEB3 Agency Verification Portal
+</div>
+
+<div class="badge">
+SECURE VERIFICATION
+</div>
+
+<label>Enter Telegram or X Username</label>
+
+<input id="username" type="text" placeholder="@username">
+
+<button onclick="verifyUser()">
+VERIFY ACCOUNT
+</button>
+
+<div id="result" class="result"></div>
+
+<div class="footer">
+Verification is provided by APEX WEB3 Agency and is not an official Telegram or X verification.
+</div>
+
+</div>
+
+<script>
+
+const verifiedUsers = {
+"crypto_raven_call":{
+platform:"Telegram",
+type:"KOL / Call Channel",
+status:"Verified",
+date:"20 September 2026"
+},
+
+"barbiesquirreliadventure":{
+platform:"Telegram",
+type:"KOL / Call Channel",
+status:"Verified",
+date:"20 September 2026"
+},
+
+"apexweb3agency":{
+platform:"Telegram",
+type:"Web3 Agency",
+status:"Verified",
+date:"20 September 2026"
+}
+};
+
+function verifyUser(){
+
+let username=document.getElementById("username").value
+.trim()
+.replace("@","")
+.toLowerCase();
+
+let result=document.getElementById("result");
+
+if(!username){
+result.style.display="block";
+result.innerHTML='<div class="notverified">⚠ Please enter a username</div>';
+return;
+}
+
+if(verifiedUsers[username]){
+
+let user=verifiedUsers[username];
+
+result.style.display="block";
+
+result.innerHTML=`
+<div class="verified">✓ VERIFIED</div>
+<div class="details">
+<b>Username:</b> @${username}<br>
+<b>Platform:</b> ${user.platform}<br>
+<b>Type:</b> ${user.type}<br>
+<b>Status:</b> ${user.status}<br>
+<b>Verified Date:</b> ${user.date}
+</div>
+`;
+
+}else{
+
+result.style.display="block";
+
+result.innerHTML=`
+<div class="notverified">✕ NOT VERIFIED</div>
+<div class="details">
+No verified record was found for <b>@${username}</b>.
+</div>
+`;
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
