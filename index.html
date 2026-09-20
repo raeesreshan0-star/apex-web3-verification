@@ -168,14 +168,8 @@ Verification is provided by APEX WEB3 Agency and is not an official Telegram or 
 
 <script>
 
-/* SUPABASE CONNECTION */
-
 const SUPABASE_URL = "https://bpcqvztdfldmcnqnptkj.supabase.co";
-
 const SUPABASE_KEY = "sb_publishable_zoG2adG4yayyfYgchWxqdA_-Q4kNhkI";
-
-
-/* VERIFY ACCOUNT */
 
 async function verifyUser(){
 
@@ -189,36 +183,46 @@ async function verifyUser(){
         .toLowerCase();
 
     if(!username){
-
         result.style.display = "block";
-
         result.innerHTML = `
         <div class="notverified">
         ⚠ Please enter a username
         </div>
         `;
-
         return;
     }
 
     button.disabled = true;
     button.innerText = "VERIFYING...";
 
-    try{
+    try {
 
-        const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/verified_accounts?telegram_username=eq.${encodeURIComponent("@" + username)}&status=eq.verified&select=channel_name,telegram_username,status`,
-            {
-                method: "GET",
+        /*
+        Check both possible formats:
+        @username
+        username
+        */
 
-                headers: {
-                    "apikey": SUPABASE_KEY,
-                    "Authorization": `Bearer ${SUPABASE_KEY}`
-                }
+        const usernameWithAt = "@" + username;
+
+        const query =
+        `${SUPABASE_URL}/rest/v1/verified_accounts` +
+        `?or=(telegram_username.eq.${encodeURIComponent(usernameWithAt)},telegram_username.eq.${encodeURIComponent(username)})` +
+        `&status=eq.verified` +
+        `&select=channel_name,telegram_username,status`;
+
+        const response = await fetch(query, {
+            method: "GET",
+            headers: {
+                "apikey": SUPABASE_KEY,
+                "Authorization": `Bearer ${SUPABASE_KEY}`,
+                "Content-Type": "application/json"
             }
-        );
+        });
 
         if(!response.ok){
+            const errorText = await response.text();
+            console.error("Supabase error:", errorText);
             throw new Error("Database connection failed");
         }
 
@@ -242,7 +246,7 @@ async function verifyUser(){
             </div>
             `;
 
-        }else{
+        } else {
 
             result.innerHTML = `
             <div class="notverified">
@@ -255,7 +259,7 @@ async function verifyUser(){
             `;
         }
 
-    }catch(error){
+    } catch(error) {
 
         console.error(error);
 
@@ -271,7 +275,7 @@ async function verifyUser(){
         </div>
         `;
 
-    }finally{
+    } finally {
 
         button.disabled = false;
         button.innerText = "VERIFY ACCOUNT";
