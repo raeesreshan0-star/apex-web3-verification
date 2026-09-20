@@ -91,6 +91,11 @@ font-weight:700;
 cursor:pointer;
 }
 
+button:disabled{
+opacity:.6;
+cursor:not-allowed;
+}
+
 .result{
 display:none;
 margin-top:25px;
@@ -149,7 +154,7 @@ SECURE VERIFICATION
 
 <input id="username" type="text" placeholder="@username">
 
-<button onclick="verifyUser()">
+<button id="verifyButton" onclick="verifyUser()">
 VERIFY ACCOUNT
 </button>
 
@@ -163,108 +168,118 @@ Verification is provided by APEX WEB3 Agency and is not an official Telegram or 
 
 <script>
 
-const verifiedUsers = {
-"crypto_raven_call":{
-platform:"Telegram",
-type:"KOL / Call Channel",
-status:"Verified",
-date:"20 September 2026"
-},
+/* SUPABASE CONNECTION */
 
-"barbiesquirreliadventure":{
-platform:"Telegram",
-type:"KOL / Call Channel",
-status:"Verified",
-date:"20 September 2026"
-},
+const SUPABASE_URL = "https://bpcqvztdfldmcnqnptkj.supabase.co";
 
-"apexweb3agency":{
-platform:"Telegram",
-type:"Web3 Agency",
-status:"Verified",
-date:"20 September 2026"
-}
-};
-
-function verifyUser(){
-
-let username=document.getElementById("username").value
-.trim()
-.replace("@","")
-.toLowerCase();
-
-let result=document.getElementById("result");
-
-if(!username){
-result.style.display="block";
-result.innerHTML='<div class="notverified">⚠ Please enter a username</div>';
-return;
-}
-
-if(verifiedUsers[username]){
-
-let user=verifiedUsers[username];
-
-result.style.display="block";
-
-result.innerHTML=`
-<div class="verified">✓ VERIFIED</div>
-<div class="details">
-<b>Username:</b> @${username}<br>
-<b>Platform:</b> ${user.platform}<br>
-<b>Type:</b> ${user.type}<br>
-<b>Status:</b> ${user.status}<br>
-<b>Verified Date:</b> ${user.date}
-</div>
-`;
-
-}else{
-
-result.style.display="block";
-
-result.innerHTML=`
-<div class="notverified">✕ NOT VERIFIED</div>
-<div class="details">
-No verified record was found for <b>@${username}</b>.
-</div>
-`;
-
-}
-
-}
-
-</script>
-<script>
-const SUPABASE_URL = "bpcqvztdfldmcnqnptkj";
 const SUPABASE_KEY = "sb_publishable_zoG2adG4yayyfYgchWxqdA_-Q4kNhkI";
 
-async function verifyAccount() {
-    const input = document.querySelector("input");
-    const username = input.value.trim().replace(/^@/, "");
 
-    if (!username) {
-        alert("Please enter a username");
+/* VERIFY ACCOUNT */
+
+async function verifyUser(){
+
+    const input = document.getElementById("username");
+    const result = document.getElementById("result");
+    const button = document.getElementById("verifyButton");
+
+    let username = input.value
+        .trim()
+        .replace(/^@/, "")
+        .toLowerCase();
+
+    if(!username){
+
+        result.style.display = "block";
+
+        result.innerHTML = `
+        <div class="notverified">
+        ⚠ Please enter a username
+        </div>
+        `;
+
         return;
     }
 
-    const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/verified_accounts?telegram_username=eq.@${username}&status=eq.verified&select=channel_name,status`,
-        {
-            headers: {
-                "apikey": SUPABASE_KEY,
-                "Authorization": `Bearer ${SUPABASE_KEY}`
+    button.disabled = true;
+    button.innerText = "VERIFYING...";
+
+    try{
+
+        const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/verified_account?telegram_username=eq.${encodeURIComponent("@" + username)}&status=eq.verified&select=channel_name,telegram_username,status`,
+            {
+                method: "GET",
+
+                headers: {
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": `Bearer ${SUPABASE_KEY}`
+                }
             }
+        );
+
+        if(!response.ok){
+            throw new Error("Database connection failed");
         }
-    );
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (data.length > 0) {
-        alert("✅ This account is verified");
-    } else {
-        alert("❌ This account is not verified");
+        result.style.display = "block";
+
+        if(data.length > 0){
+
+            const user = data[0];
+
+            result.innerHTML = `
+            <div class="verified">
+            ✓ VERIFIED
+            </div>
+
+            <div class="details">
+            <b>Username:</b> ${user.telegram_username}<br>
+            <b>Channel:</b> ${user.channel_name}<br>
+            <b>Status:</b> Verified
+            </div>
+            `;
+
+        }else{
+
+            result.innerHTML = `
+            <div class="notverified">
+            ✕ NOT VERIFIED
+            </div>
+
+            <div class="details">
+            No verified record was found for <b>@${username}</b>.
+            </div>
+            `;
+        }
+
+    }catch(error){
+
+        console.error(error);
+
+        result.style.display = "block";
+
+        result.innerHTML = `
+        <div class="notverified">
+        ⚠ Verification Error
+        </div>
+
+        <div class="details">
+        Unable to connect to the verification database.
+        </div>
+        `;
+
+    }finally{
+
+        button.disabled = false;
+        button.innerText = "VERIFY ACCOUNT";
+
     }
 }
+
 </script>
+
 </body>
 </html>
