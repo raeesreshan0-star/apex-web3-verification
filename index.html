@@ -1,136 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>APEX WEB3 Verification</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #05070b;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 520px;
+    background: #0c1018;
+    border: 1px solid #252d3a;
+    border-radius: 22px;
+    padding: 32px 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+}
+
+.logo {
+    text-align: center;
+    font-size: 27px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.logo span {
+    color: #d6a84f;
+}
+
+.subtitle {
+    text-align: center;
+    color: #8e98a8;
+    font-size: 14px;
+    margin-bottom: 30px;
+}
+
+.badge {
+    display: block;
+    width: max-content;
+    margin: 0 auto 25px;
+    padding: 7px 14px;
+    border-radius: 30px;
+    background: #151b25;
+    border: 1px solid #303a4a;
+    font-size: 12px;
+    color: #d6a84f;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    color: #aeb7c5;
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #303846;
+    background: #070a10;
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #d6a84f;
+}
+
+button {
+    width: 100%;
+    margin-top: 14px;
+    padding: 15px;
+    border: 0;
+    border-radius: 12px;
+    background: #d6a84f;
+    color: #080a0e;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.result {
+    display: none;
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 15px;
+    background: #080c12;
+    border: 1px solid #26303d;
+}
+
+.verified {
+    color: #58d68d;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.notverified {
+    color: #ff6b6b;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.details {
+    color: #aeb7c5;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 11px;
+    color: #657080;
+    line-height: 1.5;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">
+        APEX <span>WEB3</span>
+    </div>
+
+    <div class="subtitle">
+        Official APEX WEB3 Agency Verification Portal
+    </div>
+
+    <div class="badge">
+        SECURE VERIFICATION
+    </div>
+
+    <label for="username">
+        Enter Telegram or X Username
+    </label>
+
+    <input
+        id="username"
+        type="text"
+        placeholder="@username"
+        autocomplete="off"
+    >
+
+    <button id="verifyButton" onclick="verifyUser()">
+        VERIFY ACCOUNT
+    </button>
+
+    <div id="result" class="result"></div>
+
+    <div class="footer">
+        Verification is provided by APEX WEB3 Agency and is
+        not an official Telegram or X verification.
+    </div>
+
+</div>
+
 <script>
 
-const SUPABASE_URL = "https://bpcqvztdfldmcnqnptkj.supabase.co";
-const SUPABASE_KEY = "sb_publishable_zoG2adG4yayyfYgchWxqdA_-Q4kNhkI";
+const SUPABASE_URL =
+    "https://bpcqvztdfldmcnqnptkj.supabase.co";
 
- async function checkUsername(username) {
+const SUPABASE_KEY =
+    "sb_publishable_zoG2adG4yayyfYgchWxqdA_-Q4kNhkI";
+
+
+/* =========================
+   DATABASE CHECK
+========================= */
+
+async function checkUsername(username) {
 
     const url =
-        `${SUPABASE_URL}/rest/v1/verified_accounts` +
-        `?telegram_username=ilike.${encodeURIComponent(username)}` +
-        `&select=channel_name,telegram_username,status`;
+        SUPABASE_URL +
+        "/rest/v1/verified_accounts" +
+        "?telegram_username=ilike." +
+        encodeURIComponent(username) +
+        "&select=channel_name,telegram_username,status";
 
     const response = await fetch(url, {
         method: "GET",
+
         headers: {
             "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`
+            "Authorization": "Bearer " + SUPABASE_KEY
         }
     });
 
     if (!response.ok) {
-        const error = await response.text();
-        console.error("Supabase Error:", error);
-        throw new Error("Database error");
+
+        const errorText = await response.text();
+
+        console.error(
+            "Supabase Error:",
+            errorText
+        );
+
+        throw new Error("Database connection failed");
     }
 
     return await response.json();
- }
 }
+
+
+/* =========================
+   VERIFY USER
+========================= */
 
 async function verifyUser() {
 
-    const input = document.getElementById("username");
-    const result = document.getElementById("result");
-    const button = document.getElementById("verifyButton");
+    const input =
+        document.getElementById("username");
+
+    const result =
+        document.getElementById("result");
+
+    const button =
+        document.getElementById("verifyButton");
+
 
     let username = input.value
         .trim()
-        .replace(/^@+/, "")
-        .toLowerCase();
+        .replace(/^@+/, "");
+
 
     if (!username) {
+
         result.style.display = "block";
+
         result.innerHTML = `
             <div class="notverified">
                 ⚠ Please enter a username
             </div>
         `;
+
         return;
     }
+
 
     button.disabled = true;
     button.innerText = "VERIFYING...";
 
+
     try {
 
-        // Check username without @
-        let data = await checkUsername(username);
+        /*
+         * First check username without @
+         */
 
-        // If not found, check username with @
+        let data =
+            await checkUsername(username);
+
+
+        /*
+         * If not found,
+         * check username with @
+         */
+
         if (data.length === 0) {
-            data = await checkUsername("@" + username);
+
+            data =
+                await checkUsername("@" + username);
         }
 
+
         result.style.display = "block";
+
+
+        /* =========================
+           USER FOUND
+        ========================= */
 
         if (data.length > 0) {
 
             const user = data[0];
 
-            // Accept verified status regardless of capitalization
-            if (String(user.status).toLowerCase() === "verified") {
+            const status =
+                String(user.status || "")
+                .trim()
+                .toLowerCase();
+
+
+            /*
+             * Only actual "verified"
+             * status will show VERIFIED.
+             */
+
+            if (status === "verified") {
 
                 result.innerHTML = `
+
                     <div class="verified">
                         ✓ VERIFIED
-                    </div>
-
-                    <div class="details">
-                        <b>Username:</b> ${user.telegram_username}<br>
-                        <b>Channel:</b> ${user.channel_name}<br>
-                        <b>Status:</b> Verified
-                    </div>
-                `;
-
-            } else {
-
-                result.innerHTML = `
-                    <div class="notverified">
-                        ✕ NOT VERIFIED
-                    </div>
-
-                    <div class="details">
-                        Account found, but its verification status is not active.
-                    </div>
-                `;
-            }
-
-        } else {
-
-            result.innerHTML = `
-                <div class="notverified">
-                    ✕ NOT VERIFIED
-                </div>
-
-                <div class="details">
-                    No verified record was found for <b>@${username}</b>.
-                </div>
-            `;
-        }
-
-    } catch (error) {
-
-        console.error(error);
-
-        result.style.display = "block";
-
-        result.innerHTML = `
-            <div class="notverified">
-                ⚠ Verification Error
-            </div>
-
-            <div class="details">
-                Unable to connect to the verification database.
-            </div>
-        `;
-
-    } finally {
-
-        button.disabled = false;
-        button.innerText = "VERIFY ACCOUNT";
-
-    }
-}
-
-</script>
+                    </div
