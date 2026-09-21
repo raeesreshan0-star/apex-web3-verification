@@ -3,11 +3,11 @@
 const SUPABASE_URL = "https://bpcqvztdfldmcnqnptkj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_zoG2adG4yayyfYgchWxqdA_-Q4kNhkI";
 
-async function checkUsername(username) {
+ async function checkUsername(username) {
 
     const url =
         `${SUPABASE_URL}/rest/v1/verified_accounts` +
-        `?telegram_username=eq.${encodeURIComponent(username)}` +
+        `?telegram_username=ilike.${encodeURIComponent(username)}` +
         `&select=channel_name,telegram_username,status`;
 
     const response = await fetch(url, {
@@ -25,6 +25,7 @@ async function checkUsername(username) {
     }
 
     return await response.json();
+ }
 }
 
 async function verifyUser() {
